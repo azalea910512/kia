@@ -197,66 +197,45 @@ chmod +x sq3.sh
 apt-get -y install webmin
 sed -i 's/ssl=1/ssl=0/g' /etc/webmin/miniserv.conf
 
-# install stunnel
-apt-get install stunnel4 -y
-cat > /etc/stunnel/stunnel.conf <<-END
-cert = /etc/stunnel/stunnel.pem
-client = no
-socket = a:SO_REUSEADDR=1
-socket = l:TCP_NODELAY=1
-socket = r:TCP_NODELAY=1
+cat > /home/vps/public_html/stunnel.conf <<-END
 
-[dropbear]
-accept = 446
-connect = 127.0.0.1:143
-
-[dropbear]
-accept = 444
-connect = 127.0.0.1:143
-
-[dropbear]
-accept = 445
-connect = 127.0.0.1:143
-
-[dropbear]
-accept = 446
-connect = 127.0.0.1:143
+client = yes
+debug = 6
 
 [openvpn]
-accept = 990
-connect = 127.0.0.1:1147
-
+accept = 127.0.0.1:1147
+connect = $MYIP:990
+TIMEOUTclose = 0
+verify = 0
+sni = m.facebook.com
 END
 
-# make a certificate
-openssl genrsa -out key.pem 2048
-openssl req -new -x509 -key key.pem -out cert.pem -days 1095 \
--subj "/C=$country/ST=$state/L=$locality/O=$organization/OU=$organizationalunit/CN=$commonname/emailAddress=$email"
-cat key.pem cert.pem >> /etc/stunnel/stunnel.pem
-
-# configure stunnel
+# Configure Stunnel
 sed -i 's/ENABLED=0/ENABLED=1/g' /etc/default/stunnel4
-cd /etc/stunnel/
-wget -O /etc/stunnel/ssl.conf "https://raw.githubusercontent.com/azalea910512/kia/main/ssl.conf"
-sed -i $MYIP2 /etc/stunnel/ssl.conf;
-cp ssl.conf /home/vps/public_html/
-cd
+openssl req -new -newkey rsa:2048 -days 3650 -nodes -x509 -sha256 -subj '/CN=127.0.0.1/O=localhost/C=PH' -keyout /etc/stunnel/stunnel.pem -out /etc/stunnel/stunnel.pem
+cat > /etc/stunnel/stunnel.conf <<-END
 
+sslVersion = all
+pid = /stunnel.pid
+socket = l:TCP_NODELAY=1
+socket = r:TCP_NODELAY=1
+client = no
+
+[openvpn]
+accept = 587
+connect = 127.0.0.1:1147
+cert = /etc/stunnel/stunnel.pem
+
+[dropbear]
+accept = 443
+connect = 127.0.0.1:442
+cert = /etc/stunnel/stunnel.pem
+
+END
+cd
 # colored text
 apt-get -y install ruby
 gem install lolcat
-
-# install fail2ban
-apt-get -y install fail2ban
-
-# install ddos deflate
-cd
-apt-get -y install dnsutils dsniff
-wget https://raw.githubusercontent.com/nstfreenet/debian/main/ddos-deflate-master.zip
-unzip ddos-deflate-master.zip
-cd ddos-deflate-master
-./install.sh
-rm -rf /root/ddos-deflate-master.zip
 
 # banner /etc/bnr
 wget -O /etc/banner.txt "https://raw.githubusercontent.com/nstfreenet/debian/main/banner.txt"
