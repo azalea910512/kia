@@ -237,7 +237,7 @@ cat key.pem cert.pem >> /etc/stunnel/stunnel.pem
 # configure stunnel
 sed -i 's/ENABLED=0/ENABLED=1/g' /etc/default/stunnel4
 cd /etc/stunnel/
-wget -O /etc/stunnel/ssl.conf "https://raw.githubusercontent.com/kakitong/bugssl/main/ssl.conf"
+wget -O /etc/stunnel/ssl.conf "https://raw.githubusercontent.com/azalea910512/kia/main/ssl.conf"
 sed -i $MYIP2 /etc/stunnel/ssl.conf;
 cp ssl.conf /home/vps/public_html/
 cd
