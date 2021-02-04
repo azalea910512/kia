@@ -80,7 +80,7 @@ sed -i '$ i\echo 1 > /proc/sys/net/ipv6/conf/all/disable_ipv6' /etc/rc.local
 
 # install wget, sudo and curl
 apt-get update;apt-get -y install wget sudo curl;
-apt install dos2unix
+
 
 # set time GMT -3
 ln -fs /usr/share/zoneinfo/America/Sao_Paulo /etc/localtime
@@ -90,8 +90,6 @@ sed -i 's/AcceptEnv/#AcceptEnv/g' /etc/ssh/sshd_config
 service sshd restart
 
 # set repo
-wget "http://www.dotdeb.org/dotdeb.gpg"
-cat dotdeb.gpg | apt-key add -;rm dotdeb.gpg
 sh -c 'echo "deb http://download.webmin.com/download/repository sarge contrib" > /etc/apt/sources.list.d/webmin.list'
 wget -qO - http://www.webmin.com/jcameron-key.asc | apt-key add -
 
@@ -103,19 +101,6 @@ apt-get -y install nginx
 
 # install essential package
 apt-get -y install nano iptables dnsutils openvpn screen whois ngrep nload nmap unzip unrar zip
-
-# install neofetch
-echo "deb http://dl.bintray.com/dawidd6/neofetch jessie main" | tee -a /etc/apt/sources.list
-curl "https://bintray.com/user/downloadSubjectPublicKey?username=bintray"| apt-key add -
-apt-get update
-apt-get install neofetch
-
-echo "deb http://dl.bintray.com/dawidd6/neofetch jessie main" | tee -a /etc/apt/sources.list
-curl "https://bintray.com/user/downloadSubjectPublicKey?username=bintray"| apt-key add -
-apt-get update
-apt-get install neofetch
-echo "clear" >> .bash_profile
-echo "menu" >> .bash_profile
 
 # install webserver
 cd
@@ -232,19 +217,6 @@ echo "/bin/false" >> /etc/shells
 echo "/usr/sbin/nologin" >> /etc/shells
 service ssh restart
 service dropbear restart
-
-# install dropbear 2018
-cd
-wget https://raw.githubusercontent.com/redeviver/script/master/dropbear-2018.76.tar.bz2
-apt-get -y install zlib1g-dev build-essential
-bzip2 -cd dropbear-2018.76.tar.bz2  | tar xvf -
-cd dropbear-2018.76
-./configure
-make && make install -y
-mv /usr/sbin/dropbear /usr/sbin/dropbear1
-ln /usr/local/sbin/dropbear /usr/sbin/dropbear
-service dropbear restart
-rm -rf /root/dropbear-2018.76.tar.bz2
 
 # install stunnel4
 apt-get -y install stunnel4
@@ -383,7 +355,6 @@ chmod +x info
 chmod +x expdel
 chmod +x about
 chmod +x delete
-chmod +x vnc && dos2unix vnc
 
 # finishing
 cd
