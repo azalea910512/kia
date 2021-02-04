@@ -94,12 +94,6 @@ INSTALLER PROCESS PLEASE WAIT
 
 TAKE TIME 5-10 MINUTE
 "
-# fail2ban & exim & protection
-apt-get install -y grepcidr
-apt-get install -y libxml-parser-perl
-apt-get -y install tcpdump fail2ban sysv-rc-conf dnsutils dsniff zip unzip;
-wget https://github.com/jgmdev/ddos-deflate/archive/master.zip;unzip master.zip;
-cd ddos-deflate-master && ./install.sh
 service exim4 stop;sysv-rc-conf exim4 off;
 
 # webmin
@@ -392,42 +386,6 @@ $(cat /etc/openvpn/tls-auth.key)
 </tls-auth>
 EOF16
 
-# Setting UFW
-apt-get install ufw
-ufw allow ssh
-ufw allow 443/tcp
-sed -i 's|DEFAULT_INPUT_POLICY="DROP"|DEFAULT_INPUT_POLICY="ACCEPT"|' /etc/default/ufw
-sed -i 's|DEFAULT_FORWARD_POLICY="DROP"|DEFAULT_FORWARD_POLICY="ACCEPT"|' /etc/default/ufw
-cat > /etc/ufw/before.rules <<-END
-# START OPENVPN RULES
-# NAT table rules
-*nat
-:POSTROUTING ACCEPT [0:0]
-# Allow traffic from OpenVPN client to eth0
--A POSTROUTING -s 10.8.0.0/8 -o eth0 -j MASQUERADE
-COMMIT
-# END OPENVPN RULES
-END
-ufw status
-ufw disable
-
-# install sslh
-apt-get -y install sslh
-echo ' 
-RUN=yes
-DAEMON=/usr/sbin/sslh
-DAEMON_OPTS="-u sslh -p 0.0.0.0:443 --ssh 127.0.0.1:22 --openvpn 127.0.0.1:587 --openvpn 127.0.0.1:1194 -P /var/run/sslh/sslh.pid" ' > /etc/default/sslh
-echo '
-iptables -t mangle -N SSLH
-iptables -t mangle -A OUTPUT --protocol tcp --out-interface eth0 --sport 22 --jump SSLH
-iptables -t mangle -A OUTPUT --protocol tcp --out-interface eth0 --sport 143 --jump SSLH
-iptables -t mangle -A OUTPUT --protocol tcp --out-interface eth0 --sport 443 --jump SSLH
-iptables -t mangle -A OUTPUT --protocol tcp --out-interface eth0 --sport 587 --jump SSLH
-iptables -t mangle -A OUTPUT --protocol tcp --out-interface eth0 --sport 1194 --jump SSLH
-iptables -t mangle -A SSLH --jump MARK --set-mark 0x1
-iptables -t mangle -A SSLH --jump ACCEPT ' >> /etc/rc.local
-service sslh start
-
 # install stunnel4
 apt-get -y install stunnel4
 wget -O /etc/stunnel/stunnel.pem "https://raw.githubusercontent.com/redeviver/stunnel4/master/stunnel.pem"
@@ -445,7 +403,7 @@ iptables-save > /etc/iptables_set.conf
 cd
 wget -O /usr/bin/badvpn-udpgw "https://raw.githubusercontent.com/TongGakod/sultan/main/badvpn-udpgw"
 if [ "$OS" == "x86_64" ]; then
-  wget -O /usr/bin/badvpn-udpgw "https://raw.githubusercontent.com/TongGakod/sultan/main/badvpn-udpgw64"
+  wget -O /usr/bin/badvpn-udpgw "https://raw.githubusercontent.com/Tond/sultan/main/badvpn-udpgw64"
 fi
 sed -i '$ i\screen -AmdS badvpn badvpn-udpgw --listen-addr 127.0.0.1:7300' /etc/rc.local
 chmod +x /usr/bin/badvpn-udpgw
@@ -453,50 +411,7 @@ screen -AmdS badvpn badvpn-udpgw --listen-addr 127.0.0.1:7300
 
 wget https://raw.githubusercontent.com/padubang/gans/main/setupmenu && bash setupmenu
 # freeradius
-apt-get -y install freeradius
-cat /dev/null > /etc/freeradius/users
-echo "ara Cleartext-Password := ara" > /etc/freeradius/users
-# Lock Dropbear Expired ID
-wget -O /usr/local/bin/lockidexp.sh "https://raw.githubusercontent.com/TongGakod/sultan/main/lockidexp.sh"
-chmod +x /usr/local/bin/lockidexp.sh
-crontab -l > mycron
-echo "1 8 * * * /usr/local/bin/lockidexp.sh" >> mycron
-crontab mycron
-rm mycron
-# BlockTorrent
-wget -O /usr/local/bin/BlockTorrentEveryReboot "https://raw.githubusercontent.com/kingmapualaut/gakod/main/BlockTorrentEveryReboot"
-chmod +x /usr/local/bin/BlockTorrentEveryReboot
-crontab -l > mycron
-echo "@reboot /usr/local/bin/BlockTorrentEveryReboot" >> mycron
-crontab mycron
-rm mycron
-# restart service
-service stunnel4 restart
-service ssh restart
-service openvpn restart
-service dropbear restart
-service nginx restart
-service webmin restart
-service squid restart
-service fail2ban restart
-service freeradius restart
-clear
 
-# softether
-apt install build-essential -y;
-cd && wget https://github.com/SoftEtherVPN/SoftEtherVPN_Stable/releases/download/v4.28-9669-beta/softether-vpnserver-v4.28-9669-beta-2018.09.11-linux-x64-64bit.tar.gz
-tar xzf softether-vpnserver-v4.28-9669-beta-2018.09.11-linux-x64-64bit.tar.gz
-clear
-echo  -e "\033[31;7mNOTE: ANSWER 1 AND ENTER THREE TIMES FOR THE COMPILATION TO PROCEED\033[0m"
-cd vpnserver && make && ./vpnserver start
-mkdir /usr/local/vpnserver/
-cd && mv vpnserver /usr/local && cd /usr/local/vpnserver/ && chmod 600 * && chmod 700 vpnserver && chmod 700 vpncmd
-crontab -l > mycron
-echo "@reboot /usr/local/vpnserver/vpnserver start" >> mycron
-crontab mycron
-rm mycron
-/usr/local/vpnserver/vpnserver start
-clear
 
 # finishing
 cd
@@ -505,7 +420,7 @@ chown -R www-data:www-data /home/vps/public_html
 /etc/init.d/openvpn restart
 /etc/init.d/cron restart
 /etc/init.d/ssh restart
-/etc/init.d/php7.0-fpm restart
+/etc/init.d/php7.0restart
 /etc/init.d/dropbear restart
 /etc/init.d/fail2ban restart
 /etc/init.d/webmin restart
