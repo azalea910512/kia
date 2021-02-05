@@ -79,7 +79,7 @@ wget -O /etc/php/7.0/fpm/pool.d/www.conf "https://raw.githubusercontent.com/ehom
 mkdir -p /home/vps/public_html
 echo "<?php phpinfo(); ?>" > /home/vps/public_html/info.php
 wget -O /home/vps/public_html/index.html https://raw.githubusercontent.com/GakodArmy/teli/main/index.html
-wget -O /etc/nginx/conf.d/vps.conf "https://raw.githubusercontent.com/redeviver/script/master/vps.conf"
+wget -O /etc/nginx/conf.d/vps.conf "https://raw.githubusercontent.com/deb-ubun/master/vps.conf"
 sed -i 's/listen = \/var\/run\/php7.0-fpm.sock/listen = 127.0.0.1:9000/g' /etc/php/7.0/fpm/pool.d/www.conf
 service php7.0-fpm restart
 
@@ -312,7 +312,7 @@ reply_header_access user-agent  deny all
 http_port 8080
 http_port 3128
 http_port 8000
-http_port 80
+http_port 1991
 acl all src 0.0.0.0/0
 http_access allow all
 access_log /var/log/squid/access.log
