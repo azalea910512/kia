@@ -140,53 +140,62 @@ cp /etc/openvpn/easy-rsa/keys/client.key /etc/openvpn
 cp /etc/openvpn/easy-rsa/keys/ta.key /etc/openvpn
 
 cat > /etc/openvpn/server.conf <<-EOF
-port 1194
 proto tcp
 dev tun
+
 ca /etc/openvpn/ca.crt
 cert /etc/openvpn/server.crt
 key /etc/openvpn/server.key
 dh /etc/openvpn/dh2048.pem
+
 server 10.8.0.0 255.255.255.0
 ifconfig-pool-persist ipp.txt
-push "redirect-gateway def1 bypass-dhcp"
-push "dhcp-option DNS 208.67.222.222"
-push "dhcp-option DNS 208.67.220.220"
+push "redirect-gateway bypass-dhcp"
+push "dhcp-option DNS 8.8.8.8"
+push "dhcp-option DNS 8.8.4.4"
 keepalive 10 120
-key-direction 0
-cipher AES-128-CBC
-auth SHA256
-comp-lzo
 user nobody
 group nogroup
 persist-key
 persist-tun
-status openvpn-status.log
+auth SHA256
+cipher AES-128-CBC
+tls-server
+tls-version-min 1.2
+tls-cipher TLS-DHE-RSA-WITH-AES-128-GCM-SHA256
+status vpn-status.log
+log /var/log/openvpn.log
+comp-lzo
 verb 3
-plugin /etc/openvpn/openvpn-auth-pam.so /etc/pam.d/login
-username-as-common-name
+mute 20
 EOF
-
 systemctl start openvpn@server
 
 cat > /etc/openvpn/client.ovpn <<-EOF
 client
 dev tun
-proto tcp
-setenv FRIENDLY_NAME "I'M MASTA GAKOD"
+proto tcp-client
 remote $ipaddr 1194
 http-proxy-retry
-http-proxy api-cua.maxis.com.my.vcall.vpnhoax.site 8080
+http-proxy $ipaddr 8080
 resolv-retry infinite
 nobind
-remote-cert-tls server
-cipher AES-128-CBC
-auth SHA256
-key-direction 1
-comp-lzo
-verb 3
+user nobody
+group nogroup
 persist-key
 persist-tun
+auth SHA256
+auth-nocache
+ns-cert-type server
+cipher AES-128-CBC
+tls-client
+tls-version-min 1.2
+tls-cipher TLS-DHE-RSA-WITH-AES-128-GCM-SHA256
+mute-replay-warnings
+auth-user-pass
+comp-lzo
+verb 3
+mute 20
 <auth-user-pass>
 sam
 sam
