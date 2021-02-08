@@ -14,14 +14,14 @@ SSH_Banner='https://pastebin.com/raw/txZhxLfG'
 
 # Dropbear Ports
 Dropbear_Port1='550'
-Dropbear_Port2='555'
+Dropbear_Port2='442'
 
 # Stunnel Ports
 Stunnel_Port1='443' # through Dropbear
 Stunnel_Port2='444' # through OpenSSH
 
 # OpenVPN Ports
-OpenVPN_Port1='110' # take note when you change this port, openvpn sun noload config will not work
+OpenVPN_Port1='1103' # take note when you change this port, openvpn sun noload config will not work
 
 # Privoxy Ports (must be 1024 or higher)
 Privoxy_Port1='8000'
@@ -31,7 +31,7 @@ Privoxy_Port2='8080'
 OvpnDownload_Port='88' # Before changing this value, please read this document. It contains all unsafe ports for Google Chrome Browser, please read from line #23 to line #89: https://chromium.googlesource.com/chromium/src.git/+/refs/heads/master/net/base/port_util.cc
 
 # Server local time
-MyVPS_Time='Asia/Manila'
+MyVPS_Time='Asia/Kuala_Lumpur'
 #############################
 
 
@@ -401,7 +401,7 @@ rwgQgPRpoZeg8kAl6Uqik0+vLOM/ZtIwcrEowIGKfmBp79VUKoqpW7tJXtkWK8QM
 hWiu9+O4+dQNTcOm
 -----END PRIVATE KEY-----
 EOF10
- cat <<'EOF11'> /etc/openvpn/server.key
+ cat <<'EOF11'> /etc/openvpn/dh.pem
 -----BEGIN DH PARAMETERS-----
 MIIBCAKCAQEA2w2E4Ppnc89jXP4tBsMizxtRPmpwJkYoBpF9EVN5QO/ws96/x8Te
 hAg2mD6ZzoPFm4KhjD9YrD+M3c05j2kCLMnPc81i+EQ6M+xG6hzbPl5D8upe3W3/
@@ -553,17 +553,16 @@ setenv CLIENT_CERT 0
 reneg-sec 0
 verb 1
 http-proxy $IPADDR $Privoxy_Port1
-http-proxy-option VERSION 1.1
-http-proxy-option CUSTOM-HEADER ""
-http-proxy-option CUSTOM-HEADER "GET https://storage.googleapis.com HTTP/1.1"
-http-proxy-option CUSTOM-HEADER Host storage.googleapis.com
-http-proxy-option CUSTOM-HEADER X-Forward-Host storage.googleapis.com
-http-proxy-option CUSTOM-HEADER X-Forwarded-For storage.googleapis.com
-http-proxy-option CUSTOM-HEADER Referrer storage.googleapis.com
 
 <ca>
 $(cat /etc/openvpn/ca.crt)
 </ca>
+<cert>
+$(cat /etc/openvpn/server.crt)
+</cert>
+<key>
+$(cat /etc/openvpn/server.key)
+</key>
 EOF15
 
 cat <<EOF152> /var/www/openvpn/Unirises-GTMConfig.ovpn
@@ -579,7 +578,6 @@ tun-mtu-extra 32
 mssfix 1450
 persist-key
 persist-tun
-auth-user-pass
 auth none
 auth-nocache
 cipher none
@@ -589,13 +587,21 @@ setenv CLIENT_CERT 0
 reneg-sec 0
 verb 1
 http-proxy $IPADDR $Privoxy_Port1
-http-proxy-option VERSION 1.1
-http-proxy-option CUSTOM-HEADER Host www.googleapis.com
-http-proxy-option CUSTOM-HEADER X-Forwarded-For www.googleapis.com
+http-proxy-retry
+<auth-user-pass>
+sam
+sam
+</auth-user-pass>
 
 <ca>
 $(cat /etc/openvpn/ca.crt)
 </ca>
+<cert>
+$(cat /etc/openvpn/server.crt)
+</cert>
+<key>
+$(cat /etc/openvpn/server.key)
+</key>
 EOF152
 
 cat <<EOF16> /var/www/openvpn/Unirises-SunConfig.ovpn
@@ -621,16 +627,20 @@ setenv CLIENT_CERT 0
 reneg-sec 0
 verb 1
 http-proxy $IPADDR $Privoxy_Port1
-http-proxy-option VERSION 1.1
-http-proxy-option CUSTOM-HEADER ""
-http-proxy-option CUSTOM-HEADER "POST https://secure.viber.com HTTP/1.1"
-http-proxy-option CUSTOM-HEADER "Host: secure.viber.com"
-http-proxy-option CUSTOM-HEADER X-Forward-Host secure.viber.com
-http-proxy-option CUSTOM-HEADER Referrer secure.viber.com
+<auth-user-pass>
+sam
+sam
+</auth-user-pass>
 
 <ca>
 $(cat /etc/openvpn/ca.crt)
 </ca>
+<cert>
+$(cat /etc/openvpn/server.crt)
+</cert>
+<key>
+$(cat /etc/openvpn/server.key)
+</key>
 EOF16
 
 cat <<EOF17> /var/www/openvpn/Unirises-SunNoloadConfig.ovpn
@@ -663,10 +673,59 @@ reneg-sec 0
 verb 0
 nice -20
 log /dev/null
+<auth-user-pass>
+sam
+sam
+</auth-user-pass>
+
 <ca>
 $(cat /etc/openvpn/ca.crt)
 </ca>
+<cert>
+$(cat /etc/openvpn/server.crt)
+</cert>
+<key>
+$(cat /etc/openvpn/server.key)
+</key>
 EOF17
+
+# Setting UFW
+apt-get install ufw
+ufw allow ssh
+ufw allow 1103/tcp
+sed -i 's|DEFAULT_INPUT_POLICY="DROP"|DEFAULT_INPUT_POLICY="ACCEPT"|' /etc/default/ufw
+sed -i 's|DEFAULT_FORWARD_POLICY="DROP"|DEFAULT_FORWARD_POLICY="ACCEPT"|' /etc/default/ufw
+cat > /etc/ufw/before.rules <<-END
+# START OPENVPN RULES
+# NAT table rules
+*nat
+:POSTROUTING ACCEPT [0:0]
+# Allow traffic from OpenVPN client to eth0
+-A POSTROUTING -s 10.8.0.0/8 -o eth0 -j MASQUERADE
+COMMIT
+# END OPENVPN RULES
+END
+ufw status
+ufw disable
+
+# install stunnel
+apt-get install stunnel4 -y
+cat > /etc/stunnel/stunnel.conf <<-END
+cert = /etc/stunnel/stunnel.pem
+[dropbear]
+accept = 444
+connect = 127.0.0.1:442
+
+[openvpn]
+accept = 990
+connect = 127.0.0.1:1103
+END
+
+# configure stunnel
+sed -i 's/ENABLED=0/ENABLED=1/g' /etc/default/stunnel4
+wget -O /etc/stunnel/stunnel.pem "https://raw.githubusercontent.com/gatotx/AutoScriptDebian9/main/Res/Other/stunnel.pem"
+service stunnel4 restart
+cd
 
  # Creating OVPN download site index.html
 cat <<'mySiteOvpn' > /var/www/openvpn/index.html
