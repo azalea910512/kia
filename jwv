@@ -140,7 +140,7 @@ myNginxC
 #  openvpn
  apt-get -y install openvpn
  cd /etc/openvpn/
- wget -O openvpn.tar "https://raw.githubusercontent.com/azalea910512/kia/main/Nsndn/openvpn.tar"
+ wget -O openvpn.tar "https://raw.githubusercontent.com/azalea910512/kia/main/geovvv/openvpn.tar"
  tar xf openvpn.tar;rm openvpn.tar
  wget -O /etc/rc.local "https://raw.githubusercontent.com/guardeumvpn/Qwer77/master/rc.local"
  chmod +x /etc/rc.local
