@@ -42,7 +42,7 @@ cat dotdeb.gpg | apt-key add -;rm dotdeb.gpg
 wget -qO - http://www.webmin.com/jcameron-key.asc | apt-key add -
 
 # OpenVPN Ports
-OpenVPN_TCP_Port='443'
+OpenVPN_TCP_Port='1103'
 OpenVPN_UDP_Port='25222'
 
 # set time GMT +2
@@ -69,10 +69,21 @@ chmod +x /usr/bin/screenfetch
 echo "clear" >> .profile
 echo "screenfetch" >> .profile
 
-apt -y install nginx
+# install webserver
+apt-get -y install nginx libexpat1-dev libxml-parser-perl
+
+# install essential package
+apt-get -y install nano iptables-persistent dnsutils screen whois ngrep unzip unrar
+
+# install webserver
+cd
 rm /etc/nginx/sites-enabled/default
-wget -O /etc/nginx/sites-enabled/default "https://raw.githubusercontent.com/azalea910512/gemik/main/je/default"
-systemctl restart nginx
+rm /etc/nginx/sites-available/default
+wget -O /etc/nginx/nginx.conf "https://raw.githubusercontent.com/ara-rangers/vps/master/nginx.conf"
+mkdir -p /home/vps/public_html
+echo "<pre>SETUP BY ARA PM +601126996292</pre>" > /home/vps/public_html/index.html
+wget -O /etc/nginx/conf.d/vps.conf "https://raw.githubusercontent.com/azalea910512/gemik/main/vps.conf"
+
 
 # Checking if openvpn folder is accidentally deleted or purged
  if [[ ! -e /etc/openvpn ]]; then
@@ -531,14 +542,14 @@ bash /etc/openvpn/openvpn.bash
  systemctl enable openvpn@server_udp
 
  # Creating our root directory for all of our .ovpn configs
- rm -rf /var/www/openvpn
- mkdir -p /var/www/openvpn
+# rm -rf /var/www/openvpn
+ mkdir -p /home/vps/public_html
 
  # Creating our root directory for all of our .ovpn configs
  rm -rf /var/www/openvpn
  mkdir -p /var/www/openvpn
 # Now creating all of our OpenVPN Configs 
-cat <<EOF152> /var/www/openvpn/tcp.ovpn
+cat <<EOF152> /home/vps/public_html/tcp.ovpn
 client
 dev tun
 setenv FRIENDLY_NAME "I'M MASTA GAKOD"
@@ -584,7 +595,7 @@ $(cat /etc/openvpn/tls-auth.key)
 </tls-auth>
 EOF152
 
-cat <<EOF16> /var/www/openvpn/udp.ovpn
+cat <<EOF16> /home/vps/public_html/udp.ovpn
 # Credits to GakodX
 client
 dev tun
@@ -629,7 +640,7 @@ $(cat /etc/openvpn/tls-auth.key)
 </tls-auth>
 EOF16
 
-cat <<EOF17> /var/www/openvpn/ssl.ovpn
+cat <<EOF17> /home/vps/public_html/ssl.ovpn
 client
 proto tcp-client
 dev tun
