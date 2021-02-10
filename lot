@@ -66,10 +66,18 @@ chmod +x /usr/bin/screenfetch
 echo "clear" >> .profile
 echo "screenfetch" >> .profile
 
-apt -y install nginx
+# install webserver
+cd
 rm /etc/nginx/sites-enabled/default
-wget -O /etc/nginx/sites-enabled/default "https://raw.githubusercontent.com/azalea910512/kia/main/default"
-systemctl restart nginx
+rm /etc/nginx/sites-available/default
+wget -O /etc/nginx/nginx.conf "https://raw.githubusercontent.com/gatotx/AutoScriptDebian9/main/Res/Other/nginx.conf"
+wget -O /etc/nginx/conf.d/vps.conf "https://raw.githubusercontent.com/gatotx/AutoScriptDebian9/main/Res/Other/vps.conf"
+wget -O /etc/nginx/conf.d/monitoring.conf "https://raw.githubusercontent.com/gatotx/AutoScriptDebian9/main/Res/Other/monitoring.conf"
+mkdir -p /home/vps/public_html
+wget -O /home/vps/public_html/index.php "https://raw.githubusercontent.com/gatotx/AutoScriptDebian9/main/Res/Panel/index.php"
+sed -i 's/listen = \/run\/php\/php7.0-fpm.sock/listen = 127.0.0.1:9000/g' /etc/php/7.0/fpm/pool.d/www.conf
+service php7.0-fpm restart
+service nginx restart
 
 #  openvpn
 apt-get -y install openvpn
@@ -92,10 +100,10 @@ chmod +x /etc/rc.local
 # echo "7C22C4ED" | chpasswd
 # echo "UPDATE DAN INSTALL SIAP 99% MOHON SABAR"
 
-# Now creating all of our OpenVPN Configs 
- rm -rf /var/www/openvpn
- mkdir -p /var/www/openvpn
-cat <<EOF152> /var/www/openvpn/tcp.ovpn
+# openvpn config
+mkdir -p /home/vps/public_html
+cat > /home/vps/public_html/tcp.ovpn <<-END
+# OpenVPN Configuration By JokerTeam
 # Credits to GakodX
 client
 dev tun
@@ -137,7 +145,7 @@ $(cat /etc/openvpn/client.key)
 <tls-auth>
 $(cat /etc/openvpn/tls-auth.key)
 </tls-auth>
-EOF152
+END
 
 # Setting UFW
 apt-get install ufw
