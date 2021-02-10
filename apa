@@ -735,6 +735,10 @@ myNginxC
  # Removing Default nginx page(port 80)
  rm -rf /etc/nginx/sites-*
 
+ # Creating our root directory for all of our .ovpn configs
+ rm -rf /var/www/openvpn
+ mkdir -p /var/www/openvpn
+
 # Now creating all of our OpenVPN Configs 
 echo "client
 dev tun
