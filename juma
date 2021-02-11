@@ -230,10 +230,10 @@ echo '<ca>' >> /home/vps/public_html/client.ovpn
 cat /etc/openvpn/ca.crt >> /home/vps/public_html/client.ovpn
 echo '</ca>' >> /home/vps/public_html/client.ovpn
 echo '<cert>' >> /home/vps/public_html/client.ovpn
-cat /etc/openvpn/client.crt >> /home/vps/public_html/client.ovpn
+cat /etc/openvpn/server.crt >> /home/vps/public_html/client.ovpn
 echo '</cert>' >> /home/vps/public_html/client.ovpn
 echo '<key>' >> /home/vps/public_html/client.ovpn
-cat /etc/openvpn/client.key >> /home/vps/public_html/client.ovpn
+cat /etc/openvpn/server.key >> /home/vps/public_html/client.ovpn
 echo '</key>' >> /home/vps/public_html/client.ovpn
 echo '<tls-auth>' >> /home/vps/public_html/client.ovpn
 cat /etc/openvpn/tls-auth.key >> /home/vps/public_html/client.ovpn
@@ -275,10 +275,10 @@ echo '<ca>' >> /home/vps/public_html/udp.ovpn
 cat /etc/openvpn/ca.crt >> /home/vps/public_html/udp.ovpn
 echo '</ca>' >> /home/vps/public_html/udp.ovpn
 echo '<cert>' >> /home/vps/public_html/udp.ovpn
-cat /etc/openvpn/client.crt >> /home/vps/public_html/udp.ovpn
+cat /etc/openvpn/server.crt >> /home/vps/public_html/udp.ovpn
 echo '</cert>' >> /home/vps/public_html/udp.ovpn
 echo '<key>' >> /home/vps/public_html/udp.ovpn
-cat /etc/openvpn/client.key >> /home/vps/public_html/udp.ovpn
+cat /etc/openvpn/server.key >> /home/vps/public_html/udp.ovpn
 echo '</key>' >> /home/vps/public_html/udp.ovpn
 echo '<tls-auth>' >> /home/vps/public_html/udp.ovpn
 cat /etc/openvpn/tls-auth.key >> /home/vps/public_html/udp.ovpn
