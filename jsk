@@ -157,8 +157,8 @@ cat > /var/www/openvpn/sam.ovpn <<-END
 client
 dev tun
 proto tcp
-remote $MYIP 443
-http-proxy $MYIP 8080
+remote $IPADDR 443
+http-proxy $IPADDR 8080
 persist-key
 persist-tun
 auth-user-pass
@@ -175,10 +175,10 @@ echo '<ca>' >> /var/www/openvpn/sam.ovpn
 cat /etc/openvpn/keys/ca.crt >> /var/www/openvpn/sam.ovpn
 echo '</ca>' >> /var/www/openvpn/sam.ovp
 echo '<cert>' >> /var/www/openvpn/sam.ovpn
-cat /etc/openvpn/keys/server.crt >> /var/www/openvpn/sam.ovpn
+cat /etc/openvpn/keys/DopekidVPN.crt >> /var/www/openvpn/sam.ovpn
 echo '</cert>' >> /var/www/openvpn/sam.ovpn
 echo '<key>' >> /var/www/openvpn/sam.ovpn
-cat /etc/openvpn/keys/server.key >> /var/www/openvpn/sam.ovpn
+cat /etc/openvpn/keys/DopekidVPN.key >> /var/www/openvpn/sam.ovpn
 echo '</key>' >> /var/www/openvpn/sam.ovpn
 cd /var/www/openvpn/
 tar -czf /var/www/openvpn/sam.tar.gz sam.ovpn
