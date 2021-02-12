@@ -27,7 +27,6 @@ Stunnel_Port2='444' # through OpenSSH
 # OpenVPN Ports
 OpenVPN_TCP_Port='1103'
 OpenVPN_UDP_Port='27015'
-OpenVPN_TTP_Port='4431'
 
 # Privoxy Ports
 Privoxy_Port1='3356'
@@ -330,42 +329,6 @@ cipher none
 auth none
 myOpenVPNconf2
 
- cat <<'myOpenVPNconf3' > /etc/openvpn/server_tcp.conf
-# GAKOD
-# TTP
-port OVPNTTP
-proto tcp
-dev tun
-dev-type tun
-sndbuf 100000
-rcvbuf 100000
-ca /etc/openvpn/ca.crt
-cert /etc/openvpn/server.crt
-key /etc/openvpn/server.key
-dh /etc/openvpn/dh2048.pem
-crl-verify /etc/openvpn/crl.pem
-tls-auth /etc/openvpn/ta.key 0
-topology subnet
-server 10.9.0.0 255.255.255.0
-ifconfig-pool-persist ipp.txt
-push "redirect-gateway def1 bypass-dhcp"
-push "dhcp-option DNS 8.8.8.8"
-push "dhcp-option DNS 8.8.4.4"
-keepalive 10 120
-cipher AES-256-CBC
-auth SHA256
-comp-lzo
-user nobody
-group nogroup
-persist-tun
-status openvpn-status.log
-verb 2
-mute 3
-plugin /etc/openvpn/openvpn-auth-pam.so /etc/pam.d/login
-verify-client-cert none
-username-as-common-name
-myOpenVPNconf3
-
  cat <<'EOF7'> /etc/openvpn/ca.crt
 -----BEGIN CERTIFICATE-----
 MIIETTCCArWgAwIBAgIJALdz0i1x0KEyMA0GCSqGSIb3DQEBCwUAMB4xHDAaBgNV
@@ -637,7 +600,6 @@ NUovpn
  # setting openvpn server port
  sed -i "s|OVPNTCP|$OpenVPN_TCP_Port|g" /etc/openvpn/server_tcp.conf
  sed -i "s|OVPNUDP|$OpenVPN_UDP_Port|g" /etc/openvpn/server_udp.conf
- sed -i "s|OVPNTTP|$OpenVPN_TTP_Port|g" /etc/openvpn/server_ttp.conf
  
  # Getting some OpenVPN plugins for unix authentication
  cd
@@ -646,9 +608,9 @@ NUovpn
  rm -f plugin.tgz
  
  # Getting some OpenVPN plugins for unix authentication
- wget -qO /etc/openvpn/b.zip 'https://raw.githubusercontent.com/GakodArmy/teli/main/openvpn_plugin64'
- unzip -qq /etc/openvpn/b.zip -d /etc/openvpn
- rm -f /etc/openvpn/b.zip
+ # wget -qO /etc/openvpn/b.zip 'https://raw.githubusercontent.com/GakodArmy/teli/main/openvpn_plugin64'
+ # unzip -qq /etc/openvpn/b.zip -d /etc/openvpn
+ # rm -f /etc/openvpn/b.zip
 
  # Some workaround for OpenVZ machines for "Startup error" openvpn service
  if [[ "$(hostnamectl | grep -i Virtualization | awk '{print $2}' | head -n1)" == 'openvz' ]]; then
@@ -1078,48 +1040,6 @@ $(cat /etc/openvpn/server.key)
 $(cat /etc/openvpn/ta.key)
 </tls-auth>
 EOF1152
-
-cat <<EOF1632> /var/www/openvpn/ttp.ovpn
-# Credits to GakodX
-client
-dev tun
-proto tcp-client
-setenv FRIENDLY_NAME "Debian VPN SNS"
-remote $IPADDR $OpenVPN_TTP_Port
-http-proxy $IPADDR $Squid_Port1
-http-proxy-retry
-resolv-retry infinite
-route-method exe
-nobind
-persist-key
-persist-tun
-comp-lzo
-cipher AES-256-CBC
-auth SHA256
-push "redirect-gateway def1 bypass-dhcp"
-verb 3
-push-peer-info
-ping 10
-ping-restart 60
-hand-window 70
-server-poll-timeout 4
-reneg-sec 2592000
-sndbuf 100000
-rcvbuf 100000
-remote-cert-tls server
-key-direction 1
-<auth-user-pass>
-sam
-sam
-</auth-user-pass>
-
-<ca>
-$(cat /etc/openvpn/ca.crt)
-$(cat /etc/openvpn/server.crt)
-$(cat /etc/openvpn/server.key)
-$(cat /etc/openvpn/ta.key)
-</tls-auth>
-EOF1632
 
  # Creating OVPN download site index.html
 cat <<'mySiteOvpn' > /var/www/openvpn/index.html
