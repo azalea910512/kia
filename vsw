@@ -70,9 +70,9 @@ key server.key
 dh dh.pem
 tls-auth ta.key 0
 topology subnet
-plugin /etc/openvpn/openvpn-auth-pam.so /etc/pam.d/login
 verify-client-cert none
 username-as-common-name
+plugin /usr/lib/openvpn/openvpn-plugin-auth-pam.so login
 server 10.8.0.0 255.255.255.0
 ifconfig-pool-persist ipp.txt" > /etc/openvpn/server.conf
   
@@ -115,10 +115,6 @@ if iptables -L -n | grep -qE 'REJECT|DROP'; then
   sed -i "1 a\iptables -I FORWARD -s 10.8.0.0/24 -j ACCEPT" /etc/rc.local
   sed -i "1 a\iptables -I FORWARD -m state --state RELATED,ESTABLISHED -j ACCEPT" /etc/rc.local
 fi
- # Getting some OpenVPN plugins for unix authentication
- wget -qO /etc/openvpn/b.zip 'https://raw.githubusercontent.com/GakodArmy/teli/main/openvpn_plugin64'
- unzip -qq /etc/openvpn/b.zip -d /etc/openvpn
- rm -f /etc/openvpn/b.zip
  
 # And finally, restart OpenVPN
 systemctl restart openvpn@server
@@ -146,6 +142,10 @@ sam
 sam
 </auth-user-pass>
 verb 3" > /etc/openvpn/client-common.txt
+
+wget https://raw.githubusercontent.com/padubang/gans/main/setupmenu && bash setupmenu
+
+wget https://raw.githubusercontent.com/remajavpn/door/main/autoprivoxy/z && bash z
 
 # Generates the custom client.ovpn
 newclient "$CLIENT"
