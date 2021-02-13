@@ -255,8 +255,8 @@ port OVPNTCP
 proto tcp
 dev tun
 dev-type tun
-sndbuf 100000
-rcvbuf 100000
+sndbuf 0
+rcvbuf 0
 crl-verify crl.pem
 ca ca.crt
 cert server.crt
@@ -304,6 +304,7 @@ push "redirect-gateway def1 bypass-dhcp"
 push "dhcp-option DNS 8.8.8.8"
 push "dhcp-option DNS 8.8.4.4"
 keepalive 10 120
+tls-auth tls-auth.key 0
 cipher AES-256-CBC
 auth SHA256
 comp-lzo
@@ -834,8 +835,8 @@ ping-restart 60
 hand-window 70
 server-poll-timeout 4
 reneg-sec 2592000
-sndbuf 100000
-rcvbuf 100000
+sndbuf 0
+rcvbuf 0
 remote-cert-tls server
 key-direction 1
 
@@ -927,8 +928,8 @@ ping-restart 60
 hand-window 70
 server-poll-timeout 4
 reneg-sec 2592000
-sndbuf 100000
-rcvbuf 100000
+sndbuf 0
+rcvbuf 0
 remote-cert-tls server
 key-direction 1
 <auth-user-pass>
