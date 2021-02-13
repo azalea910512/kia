@@ -282,12 +282,6 @@ myNginxC
  rm -rf /var/www/openvpn
  mkdir -p /var/www/openvpn
 
- # Creating our root directory for all of our .ovpn configs
- rm -rf /var/www/openvpn
- mkdir -p /var/www/openvpn
-# Now creating all of our OpenVPN Configs 
-cat <<EOF152> /var/www/openvpn/tcp.ovpn
-
 #  openvpn
 apt-get update
 apt-get -y install openvpn
