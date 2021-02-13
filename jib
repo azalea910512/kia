@@ -85,7 +85,6 @@ dev tun
 dev-type tun
 sndbuf 100000
 rcvbuf 100000
-crl-verify crl.pem
 ca ca.crt
 cert server.crt
 key server.key
