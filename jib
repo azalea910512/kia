@@ -891,6 +891,55 @@ screen -AmdS badvpn badvpn-udpgw --listen-addr 127.0.0.1:7700 --max-clients 1000
 screen -AmdS badvpn badvpn-udpgw --listen-addr 127.0.0.1:7800 --max-clients 1000 --max-connections-for-client 1000 > /dev/null &
 screen -AmdS badvpn badvpn-udpgw --listen-addr 127.0.0.1:7900 --max-clients 1000 --max-connections-for-client 1000 > /dev/null &
 
+
+# iptables-persistent
+apt install iptables-persistent -y
+
+# firewall untuk memperbolehkan akses UDP dan akses jalur TCP
+
+iptables -F
+iptables -X
+iptables -t nat -F
+iptables -t nat -X
+iptables -t mangle -F
+iptables -t mangle -X
+iptables -P INPUT ACCEPT
+iptables -P FORWARD ACCEPT
+iptables -P OUTPUT ACCEPT
+iptables -t nat -I POSTROUTING -s 10.5.0.0/24 -o eth0 -j MASQUERADE
+iptables -t nat -I POSTROUTING -s 10.6.0.0/24 -o eth0 -j MASQUERADE
+iptables -t nat -I POSTROUTING -s 10.7.0.0/24 -o eth0 -j MASQUERADE
+iptables -t nat -I POSTROUTING -s 10.8.0.0/24 -o eth0 -j MASQUERADE
+
+iptables -A INPUT -i eth0 -m state --state NEW -p tcp --dport 3306 -j ACCEPT
+iptables -A INPUT -i eth0 -m state --state NEW -p tcp --dport 7300 -j ACCEPT
+iptables -A INPUT -i eth0 -m state --state NEW -p udp --dport 7300 -j ACCEPT
+
+iptables -t nat -I POSTROUTING -s 10.5.0.0/24 -o ens3 -j MASQUERADE
+iptables -t nat -I POSTROUTING -s 10.6.0.0/24 -o ens3 -j MASQUERADE
+iptables -t nat -I POSTROUTING -s 10.7.0.0/24 -o ens3 -j MASQUERADE
+iptables -t nat -I POSTROUTING -s 10.8.0.0/24 -o ens3 -j MASQUERADE
+
+iptables-save > /etc/iptables/rules.v4
+chmod +x /etc/iptables/rules.v4
+
+# Reload IPTables
+iptables-restore -t < /etc/iptables/rules.v4
+netfilter-persistent save
+netfilter-persistent reload
+
+# Restart service openvpn
+systemctl enable openvpn
+systemctl start openvpn
+/etc/init.d/openvpn restart
+
+# set iptables tambahan
+iptables -F -t nat
+iptables -X -t nat
+iptables -A POSTROUTING -t nat -j MASQUERADE
+iptables-save > /etc/iptables-opvpn.conf
+
+
 #pivpn
 #curl https://raw.githubusercontent.com/pivpn/pivpn/master/auto_install/install.sh | bash
 
