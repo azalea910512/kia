@@ -121,7 +121,7 @@ wget -O /etc/php/7.0/fpm/pool.d/www.conf "https://raw.githubusercontent.com/ehom
 mkdir -p /home/vps/public_html
 echo "<?php phpinfo(); ?>" > /home/vps/public_html/info.php
 wget -O /home/vps/public_html/index.html https://raw.githubusercontent.com/GakodArmy/teli/main/index.html
-wget -O /etc/nginx/conf.d/vps.conf "https://raw.githubusercontent.com/ehomecore/deb-ubun/master/vps.conf"
+wget -O /etc/nginx/conf.d/vps.conf "https://raw.githubusercontent.com/azalea910512/kia/main/vpsbwjsk/vps.conf"
 sed -i 's/listen = \/var\/run\/php7.0-fpm.sock/listen = 127.0.0.1:9000/g' /etc/php/7.0/fpm/pool.d/www.conf
 service nginx restart
 service php7.0-fpm restart
@@ -130,7 +130,7 @@ service php7.0-fpm restart
  cat <<'myOpenVPNconf1' > /etc/openvpn/servertcp.conf
 # GakodScript
 
-port 443
+port 1103
 proto tcp
 dev tun
 dev-type tun
@@ -168,30 +168,31 @@ cat <<'myOpenVPNconf2' > /etc/openvpn/serverudp.conf
 port 1194
 proto udp
 dev tun
-user nobody
-group nogroup
-persist-key
-persist-tun
-keepalive 10 120
-topology subnet
-server 10.8.0.0 255.255.255.0
-ifconfig-pool-persist ipp.txt
-push "dhcp-option DNS 1.0.0.1"
-push "dhcp-option DNS 1.1.1.1"
-push "redirect-gateway def1 bypass-dhcp" 
+dev-type tun
+sndbuf 100000
+rcvbuf 100000
 crl-verify crl.pem
 ca ca.crt
 cert server.crt
 key server.key
 tls-auth tls-auth.key 0
 dh dh.pem
+topology subnet
+server 10.9.0.0 255.255.255.0
+ifconfig-pool-persist ipp.txt
+push "redirect-gateway def1 bypass-dhcp"
+push "dhcp-option DNS 8.8.8.8"
+push "dhcp-option DNS 8.8.4.4"
+keepalive 10 120
+cipher AES-256-CBC
 auth SHA256
-cipher AES-128-CBC
-tls-server
-tls-version-min 1.2
-tls-cipher TLS-DHE-RSA-WITH-AES-128-GCM-SHA256
-status openvpn.log
-verb 3
+comp-lzo
+user nobody
+group nogroup
+persist-tun
+status openvpn-status.log
+verb 2
+mute 3
 plugin /etc/openvpn/openvpn-auth-pam.so /etc/pam.d/login
 username-as-common-name
 myOpenVPNconf2
@@ -576,7 +577,7 @@ cat <<EOF152> /home/vps/public_html/tcp.ovpn
 client
 dev tun
 setenv FRIENDLY_NAME "I'M MASTA GAKOD"
-remote $MYIP 443 tcp
+remote $MYIP 1103 tcp
 http-proxy $MYIP 8080
 resolv-retry infinite
 route-method exe
@@ -622,7 +623,7 @@ client
 dev tun
 proto tcp
 setenv FRIENDLY_NAME "I'M MASTA GAKOD"
-remote 127.0.0.1 443
+remote 127.0.0.1 1103
 route $MYIP 255.255.255.255 net_gateway
 http-proxy $MYIP 8080
 resolv-retry infinite
@@ -711,7 +712,7 @@ EOF16
 # Setting UFW
 apt-get install ufw
 ufw allow ssh
-ufw allow 443/tcp
+ufw allow 1103/tcp
 sed -i 's|DEFAULT_INPUT_POLICY="DROP"|DEFAULT_INPUT_POLICY="ACCEPT"|' /etc/default/ufw
 sed -i 's|DEFAULT_FORWARD_POLICY="DROP"|DEFAULT_FORWARD_POLICY="ACCEPT"|' /etc/default/ufw
 cat > /etc/ufw/before.rules <<-END
