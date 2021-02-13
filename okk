@@ -261,7 +261,6 @@ crl-verify crl.pem
 ca ca.crt
 cert server.crt
 key server.key
-tls-auth tls-auth.key 0
 dh dh.pem
 topology subnet
 server 10.9.0.0 255.255.255.0
@@ -304,7 +303,6 @@ push "redirect-gateway def1 bypass-dhcp"
 push "dhcp-option DNS 8.8.8.8"
 push "dhcp-option DNS 8.8.4.4"
 keepalive 10 120
-tls-auth tls-auth.key 0
 cipher AES-256-CBC
 auth SHA256
 comp-lzo
@@ -853,9 +851,6 @@ $(cat /etc/openvpn/client.crt)
 <key>
 $(cat /etc/openvpn/client.key)
 </key>
-<tls-auth>
-$(cat /etc/openvpn/tls-auth.key)
-</tls-auth>
 EOF152
 
 cat <<EOF16> /var/www/openvpn/udp.ovpn
@@ -899,9 +894,6 @@ $(cat /etc/openvpn/client.crt)
 <key>
 $(cat /etc/openvpn/client.key)
 </key>
-<tls-auth>
-$(cat /etc/openvpn/tls-auth.key)
-</tls-auth>
 EOF16
 
 cat <<EOF17> /var/www/openvpn/ssl.ovpn
@@ -945,9 +937,6 @@ $(cat /etc/openvpn/client.crt)
 <key>
 $(cat /etc/openvpn/client.key)
 </key>
-<tls-auth>
-$(cat /etc/openvpn/tls-auth.key)
-</tls-auth>
 EOF17
 
  # Creating OVPN download site index.html
@@ -1226,120 +1215,6 @@ fi
  mv /tmp/abonv_mydns /etc/bonveio/my_domain_name
  mv /tmp/abonv_mydns_id /etc/bonveio/my_domain_id
  rm -rf /tmp/abonv*
-
-
- # iptables-persistent
- apt install iptables-persistent -y
-
- # firewall untuk memperbolehkan akses UDP dan akses jalur TCP
-
- iptables -F
- iptables -X
- iptables -t nat -F
- iptables -t nat -X
- iptables -t mangle -F
- iptables -t mangle -X
- iptables -P INPUT ACCEPT
- iptables -P FORWARD ACCEPT
- iptables -P OUTPUT ACCEPT
- iptables -t nat -I POSTROUTING -s 10.5.0.0/24 -o eth0 -j MASQUERADE
- iptables -t nat -I POSTROUTING -s 10.6.0.0/24 -o eth0 -j MASQUERADE
- iptables -t nat -I POSTROUTING -s 10.7.0.0/24 -o eth0 -j MASQUERADE
- iptables -t nat -I POSTROUTING -s 10.8.0.0/24 -o eth0 -j MASQUERADE
-
- iptables -A INPUT -i eth0 -m state --state NEW -p tcp --dport 3306 -j ACCEPT
- iptables -A INPUT -i eth0 -m state --state NEW -p tcp --dport 7300 -j ACCEPT
- iptables -A INPUT -i eth0 -m state --state NEW -p udp --dport 7300 -j ACCEPT
-
- iptables -t nat -I POSTROUTING -s 10.5.0.0/24 -o ens3 -j MASQUERADE
- iptables -t nat -I POSTROUTING -s 10.6.0.0/24 -o ens3 -j MASQUERADE
- iptables -t nat -I POSTROUTING -s 10.7.0.0/24 -o ens3 -j MASQUERADE
- iptables -t nat -I POSTROUTING -s 10.8.0.0/24 -o ens3 -j MASQUERADE
-
-iptables-save > /etc/iptables/rules.v4
-chmod +x /etc/iptables/rules.v4
-
- # Reload IPTables
- iptables-restore -t < /etc/iptables/rules.v4
- netfilter-persistent save
- netfilter-persistent reload
-
- # Restart service openvpn
- systemctl enable openvpn
- systemctl start openvpn
- /etc/init.d/openvpn restart
-
- # set iptables tambahan
- iptables -F -t nat
- iptables -X -t nat
- iptables -A POSTROUTING -t nat -j MASQUERADE
- iptables-save > /etc/iptables-opvpn.conf
-
-# Setting IPtables
-cat > /etc/iptables.up.rules <<-END
-*nat
-:PREROUTING ACCEPT [0:0]
-:OUTPUT ACCEPT [0:0]
-:POSTROUTING ACCEPT [0:0]
--A POSTROUTING -j SNAT --to-source xxxxxxxxx
--A POSTROUTING -o eth0 -j MASQUERADE
--A POSTROUTING -s 192.168.100.0/24 -o eth0 -j MASQUERADE
--A POSTROUTING -s 10.1.0.0/24 -o eth0 -j MASQUERADE
-COMMIT
-*filter
-:INPUT ACCEPT [19406:27313311]
-:FORWARD ACCEPT [0:0]
-:OUTPUT ACCEPT [9393:434129]
-:fail2ban-ssh - [0:0]
--A FORWARD -i eth0 -o ppp0 -m state --state RELATED,ESTABLISHED -j ACCEPT
--A FORWARD -i ppp0 -o eth0 -j ACCEPT
--A INPUT -p tcp -m multiport --dports 22 -j fail2ban-ssh
--A INPUT -p ICMP --icmp-type 8 -j ACCEPT
--A INPUT -p tcp -m tcp --dport 53 -j ACCEPT
--A INPUT -p tcp --dport 22  -m state --state NEW -j ACCEPT
--A INPUT -p tcp --dport 80  -m state --state NEW -j ACCEPT
--A INPUT -p tcp --dport 80  -m state --state NEW -j ACCEPT
--A INPUT -p tcp --dport 8888  -m state --state NEW -j ACCEPT
--A INPUT -p udp --dport 8888  -m state --state NEW -j ACCEPT
--A INPUT -p tcp --dport 142  -m state --state NEW -j ACCEPT
--A INPUT -p tcp --dport 143  -m state --state NEW -j ACCEPT
--A INPUT -p tcp --dport 109  -m state --state NEW -j ACCEPT
--A INPUT -p tcp --dport 110  -m state --state NEW -j ACCEPT
--A INPUT -p tcp --dport 443  -m state --state NEW -j ACCEPT
--A INPUT -p tcp --dport 1194  -m state --state NEW -j ACCEPT
--A INPUT -p udp --dport 1194  -m state --state NEW -j ACCEPT
--A INPUT -p tcp --dport 1732  -m state --state NEW -j ACCEPT
--A INPUT -p udp --dport 1732  -m state --state NEW -j ACCEPT
--A INPUT -p tcp --dport 3128  -m state --state NEW -j ACCEPT
--A INPUT -p udp --dport 3128  -m state --state NEW -j ACCEPT
--A INPUT -p tcp --dport 7300  -m state --state NEW -j ACCEPT
--A INPUT -p udp --dport 7300  -m state --state NEW -j ACCEPT
--A INPUT -p tcp --dport 8000  -m state --state NEW -j ACCEPT
--A INPUT -p udp --dport 8000  -m state --state NEW -j ACCEPT
--A INPUT -p tcp --dport 8080  -m state --state NEW -j ACCEPT
--A INPUT -p udp --dport 8080  -m state --state NEW -j ACCEPT
--A INPUT -p tcp --dport 10000  -m state --state NEW -j ACCEPT
--A fail2ban-ssh -j RETURN
-COMMIT
-*raw
-:PREROUTING ACCEPT [158575:227800758]
-:OUTPUT ACCEPT [46145:2312668]
-COMMIT
-*mangle
-:PREROUTING ACCEPT [158575:227800758]
-:INPUT ACCEPT [158575:227800758]
-:FORWARD ACCEPT [0:0]
-:OUTPUT ACCEPT [46145:2312668]
-:POSTROUTING ACCEPT [46145:2312668]
-COMMIT
-END
-sed -i '$ i\iptables-restore < /etc/iptables.up.rules' /etc/rc.local
-sed -i $MYIP2 /etc/iptables.up.rules;
-iptables-restore < /etc/iptables.up.rules
-
-# xml parser
-cd
-apt-get install -y libxml-parser-perl
 
  # VPS Menu script v1.0
  ConfMenu
