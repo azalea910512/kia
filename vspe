@@ -133,7 +133,7 @@ cipher none
 auth none
 myOpenVPNconf2
 
-cat <<'myOpenVPNconf3' > /etc/openvpn/server_udp.conf
+cat <<'myOpenVPNconf3' > /etc/openvpn/server_ssl.conf
 # OpenVPN SSL
 port OVPNSSL
 proto tcp
