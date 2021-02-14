@@ -21,7 +21,7 @@ OvpnDownload_Port='85' # Before changing this value, please read this document. 
 
 
 # set time GMT +7
-ln -fs /usr/share/zoneinfo/Asia/Jakarta /etc/localtime
+ln -fs /usr/share/zoneinfo/Asia/Kuala_Lumpur /etc/localtime
 
 apt-get update -y
 apt-get upgrade -y
@@ -923,6 +923,93 @@ END
 ufw status
 ufw disable
 
+# install badvpn
+cd
+#apt-get install cmake -y
+#apt-get install screen wget gcc build-essential g++ make -y
+#wget https://github.com/trngkn/badvpn/raw/main/badvpn-1.999.130.tar.gz
+#tar xf badvpn-1.999.130.tar.gz
+#cd badvpn-1.999.130/
+#cmake /home/pi/badvpn-1.999.130 -DBUILD_NOTHING_BY_DEFAULT=1 -DBUILD_UDPGW=1
+#make install
+#echo "Thiet lap BADVPN tai cong 7300"
+#badvpn-udpgw --listen-addr 127.0.0.1:7300 > /dev/null &
+#rm /root/badupd
+#echo "Thanh Cong!!"
+#echo "Yahhh"
+#install badvpn deb/ubun
+apt-get install cmake make gcc -y
+cd
+wget https://github.com/ambrop72/badvpn/archive/1.999.130.tar.gz
+tar xzf 1.999.130.tar.gz
+mkdir badvpn-build
+cd badvpn-build
+cmake ~/badvpn-1.999.130 -DBUILD_NOTHING_BY_DEFAULT=1 -DBUILD_UDPGW=1
+make install
+sed -i '$ i\screen -AmdS badvpn badvpn-udpgw --listen-addr 127.0.0.1:7000 --max-clients 1000 --max-connections-for-client 1000 > /dev/null &' /etc/rc.local
+sed -i '$ i\screen -AmdS badvpn badvpn-udpgw --listen-addr 127.0.0.1:7100 --max-clients 1000 --max-connections-for-client 1000 > /dev/null &' /etc/rc.local
+sed -i '$ i\screen -AmdS badvpn badvpn-udpgw --listen-addr 127.0.0.1:7200 --max-clients 1000 --max-connections-for-client 1000 > /dev/null &' /etc/rc.local
+sed -i '$ i\screen -AmdS badvpn badvpn-udpgw --listen-addr 127.0.0.1:7300 --max-clients 1000 --max-connections-for-client 1000 > /dev/null &' /etc/rc.local
+sed -i '$ i\screen -AmdS badvpn badvpn-udpgw --listen-addr 127.0.0.1:7400 --max-clients 1000 --max-connections-for-client 1000 > /dev/null &' /etc/rc.local
+sed -i '$ i\screen -AmdS badvpn badvpn-udpgw --listen-addr 127.0.0.1:7500 --max-clients 1000 --max-connections-for-client 1000 > /dev/null &' /etc/rc.local
+sed -i '$ i\screen -AmdS badvpn badvpn-udpgw --listen-addr 127.0.0.1:7600 --max-clients 1000 --max-connections-for-client 1000 > /dev/null &' /etc/rc.local
+sed -i '$ i\screen -AmdS badvpn badvpn-udpgw --listen-addr 127.0.0.1:7700 --max-clients 1000 --max-connections-for-client 1000 > /dev/null &' /etc/rc.local
+sed -i '$ i\screen -AmdS badvpn badvpn-udpgw --listen-addr 127.0.0.1:7800 --max-clients 1000 --max-connections-for-client 1000 > /dev/null &' /etc/rc.local
+sed -i '$ i\screen -AmdS badvpn badvpn-udpgw --listen-addr 127.0.0.1:7900 --max-clients 1000 --max-connections-for-client 1000 > /dev/null &' /etc/rc.local
+chmod +x /usr/local/bin/badvpn-udpgw
+screen -AmdS badvpn badvpn-udpgw --listen-addr 127.0.0.1:7000 --max-clients 1000 --max-connections-for-client 1000 > /dev/null &
+screen -AmdS badvpn badvpn-udpgw --listen-addr 127.0.0.1:7100 --max-clients 1000 --max-connections-for-client 1000 > /dev/null &
+screen -AmdS badvpn badvpn-udpgw --listen-addr 127.0.0.1:7200 --max-clients 1000 --max-connections-for-client 1000 > /dev/null &
+screen -AmdS badvpn badvpn-udpgw --listen-addr 127.0.0.1:7300 --max-clients 1000 --max-connections-for-client 1000 > /dev/null &
+screen -AmdS badvpn badvpn-udpgw --listen-addr 127.0.0.1:7400 --max-clients 1000 --max-connections-for-client 1000 > /dev/null &
+screen -AmdS badvpn badvpn-udpgw --listen-addr 127.0.0.1:7500 --max-clients 1000 --max-connections-for-client 1000 > /dev/null &
+screen -AmdS badvpn badvpn-udpgw --listen-addr 127.0.0.1:7600 --max-clients 1000 --max-connections-for-client 1000 > /dev/null &
+screen -AmdS badvpn badvpn-udpgw --listen-addr 127.0.0.1:7700 --max-clients 1000 --max-connections-for-client 1000 > /dev/null &
+screen -AmdS badvpn badvpn-udpgw --listen-addr 127.0.0.1:7800 --max-clients 1000 --max-connections-for-client 1000 > /dev/null &
+screen -AmdS badvpn badvpn-udpgw --listen-addr 127.0.0.1:7900 --max-clients 1000 --max-connections-for-client 1000 > /dev/null &
+
+# setting port ssh
+sed -i '/#Port 22/a Port 143' /etc/ssh/sshd_config
+sed -i '/#Port 22/a Port  90' /etc/ssh/sshd_config
+sed -i 's/#Port 22/Port  22/g' /etc/ssh/sshd_config
+/etc/init.d/ssh restart
+
+# install dropbear
+apt-get -y install dropbear
+sed -i 's/NO_START=1/NO_START=0/g' /etc/default/dropbear
+sed -i 's/DROPBEAR_PORT=22/DROPBEAR_PORT=442/g' /etc/default/dropbear
+sed -i 's/DROPBEAR_EXTRA_ARGS=/DROPBEAR_EXTRA_ARGS="-p 109 -p 110 -p 80"/g' /etc/default/dropbear
+echo "/bin/false" >> /etc/shells
+/etc/init.d/dropbear restart
+
+# installing webmin
+wget "https://raw.githubusercontent.com/gatotx/AutoScriptDebian9/main/Res/Other/webmin_1.801_all.deb"
+dpkg --install webmin_1.801_all.deb;
+apt-get -y -f install;
+sed -i 's/ssl=1/ssl=0/g' /etc/webmin/miniserv.conf
+rm /root/webmin_1.801_all.deb
+service webmin restart
+
+
+# install stunnel
+apt-get install stunnel4 -y
+cat > /etc/stunnel/stunnel.conf <<-END
+cert = /etc/stunnel/stunnel.pem
+[dropbear]
+accept = 444
+connect = 127.0.0.1:442
+
+[openvpn]
+accept = 990
+connect = 127.0.0.1:1103
+END
+
+# configure stunnel
+sed -i 's/ENABLED=0/ENABLED=1/g' /etc/default/stunnel4
+wget -O /etc/stunnel/stunnel.pem "https://raw.githubusercontent.com/gatotx/AutoScriptDebian9/main/Res/Other/stunnel.pem"
+service stunnel4 restart
+cd
+
 # hapus
 rm -rf /etc/nginx/conf.d/vps.conf
 
@@ -945,52 +1032,65 @@ sed -i "s|HAYUK|$MYIP|g" /var/www/openvpn/index.html
 # Restarting nginx service
 systemctl restart nginx
  
-# script
-wget -O /usr/local/bin/menu "https://raw.githubusercontent.com/ara-rangers/vps/master/menu"
-wget -O /usr/local/bin/m "https://raw.githubusercontent.com/ara-rangers/vps/master/menu"
-wget -O /usr/local/bin/autokill "https://raw.githubusercontent.com/ara-rangers/vps/master/autokill"
-wget -O /usr/local/bin/user-generate "https://raw.githubusercontent.com/ara-rangers/vps/master/user-generate"
-wget -O /usr/local/bin/speedtest "https://raw.githubusercontent.com/ara-rangers/vps/master/speedtest"
-wget -O /usr/local/bin/user-lock "https://raw.githubusercontent.com/ara-rangers/vps/master/user-lock"
-wget -O /usr/local/bin/user-unlock "https://raw.githubusercontent.com/ara-rangers/vps/master/user-unlock"
-wget -O /usr/local/bin/auto-reboot "https://raw.githubusercontent.com/ara-rangers/vps/master/auto-reboot"
-wget -O /usr/local/bin/user-password "https://raw.githubusercontent.com/ara-rangers/vps/master/user-password"
-wget -O /usr/local/bin/trial "https://raw.githubusercontent.com/ara-rangers/vps/master/trial"
-wget -O /etc/pam.d/common-password "https://raw.githubusercontent.com/ara-rangers/vps/master/common-password"
-chmod +x /etc/pam.d/common-password
-chmod +x /usr/local/bin/menu
-chmod +x /usr/local/bin/m
-chmod +x /usr/local/bin/autokill 
-chmod +x /usr/local/bin/user-generate 
-chmod +x /usr/local/bin/speedtest 
-chmod +x /usr/local/bin/user-unlock
-chmod +x /usr/local/bin/user-lock
-chmod +x /usr/local/bin/auto-reboot
-chmod +x /usr/local/bin/user-password
-chmod +x /usr/local/bin/trial
+  # Running screenfetch
+ wget -O /usr/bin/screenfetch "https://raw.githubusercontent.com/johndesu090/AutoScriptDB/master/Files/Plugins/screenfetch"
+ chmod +x /usr/bin/screenfetch
+ echo "/bin/bash /etc/openvpn/openvpn.bash" >> .profile
+ echo "clear" >> .profile
+ echo "screenfetch" >> .profile
 
+ 
+ # Showing script's banner message
 
 # zip
 cd
 cd /var/www/openvpn
-zip -qq -r configs.zip *.ovpn *.ehi
+zip -qq -r configs.zip
 cd
-apt-get -y update --fix-missing
+# remove unnecessary files
+apt -y autoremove
+apt -y autoclean
+apt -y clean
 
-echo " "
-echo "Application & Port Information"  | tee -a log-install.txt
-echo "   - OpenVPN		: TCP $OpenVPN_TCP_Port UDP $OpenVPN_UDP_Port "  | tee -a log-install.txt
-echo "   - Squid Proxy	: $Squid_Port1 , $Squid_Port2 (limit to IP Server)"  | tee -a log-install.txt
-echo "   - Squid ELITE	: $Squid_Port3 (limit to IP Server)"  | tee -a log-install.txt
-echo "   - Webmin                  : http://$MYIP:10000/"  | tee -a log-install.txt
-echo "OpenVPN Configs Download"  | tee -a log-install.txt
-echo "   - OpenVPN Link           : http://$MYIP:85/configs.zip"  | tee -a log-install.txt
-echo " SulaimanL"  | tee -a log-install.txt
-echo " Facebook: https://fb.me/sulaiman.xl"  | tee -a log-install.txt
-echo " Please Reboot your VPS"
+# grep ports 
+opensshport="$(netstat -ntlp | grep -i ssh | grep -i 0.0.0.0 | awk '{print $4}' | cut -d: -f2)"
+dropbearport="$(netstat -nlpt | grep -i dropbear | grep -i 0.0.0.0 | awk '{print $4}' | cut -d: -f2)"
+stunnel4port="$(netstat -nlpt | grep -i stunnel | grep -i 0.0.0.0 | awk '{print $4}' | cut -d: -f2)"
+openvpnport="$(netstat -nlpt | grep -i openvpn | grep -i 0.0.0.0 | awk '{print $4}' | cut -d: -f2)"
+squidport="$(cat /etc/squid3/squid.conf | grep -i http_port | awk '{print $2}')"
+nginxport="$(netstat -nlpt | grep -i nginx| grep -i 0.0.0.0 | awk '{print $4}' | cut -d: -f2)"
 
-# Clearing all logs from installation
-rm -rf /root/.bash_history && history -c && echo '' > /var/log/syslog
+# Info
+clear
+echo -e ""
+echo -e "\e[94m[][][]======================================[][][]"
+echo -e "\e[0m                                                   "
+echo -e "\e[94m           AutoScriptVPS by  _Dreyannz_           "
+echo -e "\e[94m                                                  "
+echo -e "\e[94m                    Services                      "
+echo -e "\e[94m                                                  "
+echo -e "\e[94m    OpenSSH        :   "$opensshport
+echo -e "\e[94m    Dropbear       :   "$dropbearport
+echo -e "\e[94m    SSL            :   "$stunnel4port
+echo -e "\e[94m    OpenVPN        :   "$openvpnport
+echo -e "\e[94m    Port Squid     :   "$squidport
+echo -e "\e[94m    Nginx          :   "$nginxport
+echo -e "\e[94m                                                  "
+echo -e "\e[94m              Other Features Included             "
+echo -e "\e[94m                                                  "
+echo -e "\e[94m    Timezone       :   Asia/Manila (GMT +7)       "
+echo -e "\e[94m    Webmin         :   http://$MYIP:10000/        "
+echo -e "\e[94m    IPV6           :   [OFF]                      "
+echo -e "\e[94m    Cron Scheduler :   [ON]                       "
+echo -e "\e[94m    Fail2Ban       :   [ON]                       "
+echo -e "\e[94m    DDOS Deflate   :   [ON]                       "
+echo -e "\e[94m    LibXML Parser  :   {ON]                       "
+echo -e "\e[0m                                                   "
+echo -e "\e[94m[][][]======================================[][][]\e[0m"
+echo -e "\e[0m                                                   "
+read -n1 -r -p "          Press Any Key To Show Commands          "
+menu
+cd
 
 }
 function ip_address(){
