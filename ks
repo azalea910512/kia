@@ -661,7 +661,7 @@ myNginxC
 
  # Now creating all of our OpenVPN Configs 
 
-cat <<EOF15> /var/www/openvpn/gtmsnswnp.ovpn
+cat <<EOF15> /var/www/openvpn/tcp.ovpn
 # Mac Quan Inc
 # Thanks for using this script, Enjoy Highspeed OpenVPN Service
 client
@@ -698,6 +698,12 @@ sam
 <ca>
 $(cat /etc/openvpn/ca.crt)
 </ca>
+<cert>
+$(cat /etc/openvpn/server.crt)
+</cert>
+<key>
+$(cat /etc/openvpn/server.key)
+</key>
 EOF15
 
 cat <<EOF16> /var/www/openvpn/sun-tutcp.ovpn
@@ -731,6 +737,12 @@ sam
 <ca>
 $(cat /etc/openvpn/ca.crt)
 </ca>
+<cert>
+$(cat /etc/openvpn/server.crt)
+</cert>
+<key>
+$(cat /etc/openvpn/server.key)
+</key>
 EOF16
 
 cat <<EOF162> /var/www/openvpn/udp.ovpn
@@ -765,9 +777,15 @@ sam
 <ca>
 $(cat /etc/openvpn/ca.crt)
 </ca>
+<cert>
+$(cat /etc/openvpn/server.crt)
+</cert>
+<key>
+$(cat /etc/openvpn/server.key)
+</key>
 EOF162
 
-cat <<EOF17> /var/www/openvpn/tcp.ovpn
+cat <<EOF17> /var/www/openvpn/ssl.ovpn
 # Mac Quan Inc
 # Thanks for using this script, Enjoy Highspeed OpenVPN Service
 client
@@ -804,6 +822,12 @@ sam
 <ca>
 $(cat /etc/openvpn/ca.crt)
 </ca>
+<cert>
+$(cat /etc/openvpn/server.crt)
+</cert>
+<key>
+$(cat /etc/openvpn/server.key)
+</key>
 EOF17
 
 cat <<EOF152> /var/www/openvpn/gtmwnp.ovpn
@@ -843,6 +867,12 @@ sam
 <ca>
 $(cat /etc/openvpn/ca.crt)
 </ca>
+<cert>
+$(cat /etc/openvpn/server.crt)
+</cert>
+<key>
+$(cat /etc/openvpn/server.key)
+</key>
 EOF152
 
 cat <<EOF1152> /var/www/openvpn/gtmsns.ovpn
@@ -882,6 +912,12 @@ sam
 <ca>
 $(cat /etc/openvpn/ca.crt)
 </ca>
+<cert>
+$(cat /etc/openvpn/server.crt)
+</cert>
+<key>
+$(cat /etc/openvpn/server.key)
+</key>
 EOF1152
 
 cat <<EOF1632> /var/www/openvpn/suntu-dns.ovpn
@@ -921,6 +957,12 @@ sam
 <ca>
 $(cat /etc/openvpn/ca.crt)
 </ca>
+<cert>
+$(cat /etc/openvpn/server.crt)
+</cert>
+<key>
+$(cat /etc/openvpn/server.key)
+</key>
 EOF1632
 
 # Setting UFW
@@ -1116,21 +1158,6 @@ fi
 #############################################
 #############################################
 
- # First thing to do is check if this machine is Debian
- source /etc/os-release
-if [[ "$ID" != 'debian' ]]; then
- ScriptMessage
- echo -e "[\e[1;31mError\e[0m] This script is for Debian only, exiting..." 
- exit 1
-fi
-
- # Now check if our machine is in root user, if not, this script exits
- # If you're on sudo user, run `sudo su -` first before running this script
- if [[ $EUID -ne 0 ]];then
- ScriptMessage
- echo -e "[\e[1;31mError\e[0m] This script must be run as root, exiting..."
- exit 1
-fi
 
  # (For OpenVPN) Checking it this machine have TUN Module, this is the tunneling interface of OpenVPN server
  if [[ ! -e /dev/net/tun ]]; then
