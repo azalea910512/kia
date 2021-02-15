@@ -584,6 +584,8 @@ EOFipt
  # Starting OpenVPN server
  systemctl start openvpn@server_tcp
  systemctl enable openvpn@server_tcp
+ systemctl start openvpn@server_ssl
+ systemctl enable openvpn@server_ssl
  systemctl start openvpn@server_udp
  systemctl enable openvpn@server_udp
 
