@@ -614,6 +614,7 @@ reneg-sec 0
 verb 1
 http-proxy $IPADDR $Squid_Port2
 http-proxy-retry
+key-direction 1
 <auth-user-pass>
 sam
 sam
@@ -675,7 +676,7 @@ EOF162
 cat <<EOF17> /var/www/openvpn/ssl.ovpn
 # Mac Quan Inc
 # Thanks for using this script, Enjoy Highspeed OpenVPN Service
-client
+client 
 dev tun
 proto tcp
 setenv FRIENDLY_NAME "Mac Quan Inc - VPN Proxy"
@@ -714,6 +715,9 @@ $(cat /etc/openvpn/server.crt)
 <key>
 $(cat /etc/openvpn/server.key)
 </key>
+<tls-auth>
+$(cat /etc/openvpn/ta.key)
+</tls-auth>
 EOF17
 
 cat <<EOF152> /var/www/openvpn/gtmwnp.ovpn
@@ -760,96 +764,6 @@ $(cat /etc/openvpn/server.crt)
 $(cat /etc/openvpn/server.key)
 </key>
 EOF152
-
-cat <<EOF1152> /var/www/openvpn/gtmsns.ovpn
-# Mac Quan Inc
-# Thanks for using this script, Enjoy Highspeed OpenVPN Service
-client
-dev tun
-proto tcp-client
-setenv FRIENDLY_NAME "Mac Quan Inc - VPN Proxy"
-remote $MYIP $OpenVPN_TCP_Port
-nobind
-persist-key
-persist-tun
-comp-lzo
-keepalive 10 120
-tls-client
-remote-cert-tls server
-verb 3
-auth-user-pass
-cipher none
-auth none
-auth-nocache
-auth-retry interact
-connect-retry 0 1
-nice -20
-reneg-sec 0
-redirect-gateway def1
-setenv CLIENT_CERT 0
-dhcp-option DNS 1.1.1.1
-dhcp-option DNS 1.0.0.1
-http-proxy $IPADDR $Squid_Port2
-http-proxy-retry
-<auth-user-pass>
-sam
-sam
-</auth-user-pass>
-<ca>
-$(cat /etc/openvpn/ca.crt)
-</ca>
-<cert>
-$(cat /etc/openvpn/server.crt)
-</cert>
-<key>
-$(cat /etc/openvpn/server.key)
-</key>
-EOF1152
-
-cat <<EOF1632> /var/www/openvpn/suntu-dns.ovpn
-# Mac Quan Inc -
-# Thanks for using this script, Enjoy Highspeed OpenVPN Service
-client
-dev tun
-proto tcp-client
-setenv FRIENDLY_NAME "Mac Quan Inc - VPN"
-remote $MYIP $OpenVPN_TCP_Port
-nobind
-persist-key
-persist-tun
-comp-lzo
-keepalive 10 120
-tls-client
-remote-cert-tls server
-verb 2
-auth-user-pass
-cipher none
-auth none
-auth-nocache
-auth-retry interact
-connect-retry 0 1
-nice -20
-reneg-sec 0
-redirect-gateway def1
-setenv CLIENT_CERT 0
-dhcp-option DNS 1.1.1.1
-dhcp-option DNS 1.0.0.1
-http-proxy $IPADDR 3356
-http-proxy-retry
-<auth-user-pass>
-sam
-sam
-</auth-user-pass>
-<ca>
-$(cat /etc/openvpn/ca.crt)
-</ca>
-<cert>
-$(cat /etc/openvpn/server.crt)
-</cert>
-<key>
-$(cat /etc/openvpn/server.key)
-</key>
-EOF1632
 
 # Setting UFW
 apt-get install ufw
