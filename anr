@@ -247,25 +247,28 @@ Highspeed OpenVPN Service
 client
 dev tun
 proto udp
-setenv FRIENDLY_NAME "Mac Quan Inc - VPN UDP"
 remote $MYIP 1194
-remote-cert-tls server
 resolv-retry infinite
-float
-fast-io
+route-method exe
+resolv-retry infinite
 nobind
 persist-key
-persist-remote-ip
 persist-tun
-auth-user-pass
-auth none
-auth-nocache
-cipher none
 comp-lzo
-redirect-gateway def1
-setenv CLIENT_CERT 0
-reneg-sec 0
-verb 1
+cipher AES-256-CBC
+auth SHA256
+push "redirect-gateway def1 bypass-dhcp"
+verb 3
+push-peer-info
+ping 10
+ping-restart 60
+hand-window 70
+server-poll-timeout 4
+reneg-sec 2592000
+sndbuf 100000
+rcvbuf 100000
+remote-cert-tls server
+key-direction 1
 <auth-user-pass>
 sam
 sam
