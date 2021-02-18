@@ -224,53 +224,25 @@ chmod +x /etc/openvpn/openvpn.bash
 # openvpn config
 #  Buat Config OpenVPN 
 mkdir -p /home/vps/public_html
-cat <<EOF15> /home/vps/public_html/tcp.ovpn
-# Mac Quan Inc
-# Thanks for using this script, Enjoy Highspeed OpenVPN Service
-client
-dev tun
-proto tcp
-setenv FRIENDLY_NAME "Mac Quan Inc - VPN Proxy"
-remote $MYIP 443
-http-proxy $MYIP 8080
-http-proxy-retry
-resolv-retry infinite
-route-method exe
-nobind
-persist-key
-persist-tun
-comp-lzo
-cipher AES-256-CBC
-auth SHA256
-push "redirect-gateway def1 bypass-dhcp"
-verb 3
-push-peer-info
-ping 10
-ping-restart 60
-hand-window 70
-server-poll-timeout 4
-reneg-sec 2592000
-sndbuf 0
-rcvbuf 0
-remote-cert-tls server
-key-direction 1
-<auth-user-pass>
-sam
-sam
-</auth-user-pass>
-<ca>
-$(cat /etc/openvpn/ca.crt)
-</ca>
-<cert>
-$(cat /etc/openvpn/client.crt)
-</cert>
-<key>
-$(cat /etc/openvpn/client.key)
-</key>
-<tls-auth>
-$(cat /etc/openvpn/ta.key)
-</tls-auth>
-EOF15
+# openvpn config
+wget -O /etc/openvpn/client.ovpn "https://raw.githubusercontent.com/bengali89/ceudp/main/client.conf"
+sed -i $MYIP2 /etc/openvpn/client.ovpn;
+echo '<ca>' >> /etc/openvpn/client.ovpn
+cat /etc/openvpn/ca.crt >> /etc/openvpn/client.ovpn
+echo '</ca>' >> /etc/openvpn/client.ovpn
+sed -i $MYIP2 /etc/openvpn/client.ovpn;
+echo '<cert>' >> /etc/openvpn/client.ovpn
+cat /etc/openvpn/client.crt >> /etc/openvpn/client.ovpn
+echo '</cert>' >> /etc/openvpn/client.ovpn
+sed -i $MYIP2 /etc/openvpn/client.ovpn;
+echo '<key>' >> /etc/openvpn/client.ovpn
+cat /etc/openvpn/client.key >> /etc/openvpn/client.ovpn
+echo '</key>' >> /etc/openvpn/client.ovpn
+sed -i $MYIP2 /etc/openvpn/client.ovpn;
+echo '<tls-auth>' >> /etc/openvpn/client.ovpn
+cat /etc/openvpn/tls-auth.key >> /etc/openvpn/client.ovpn
+echo '</tls-auth>' >> /etc/openvpn/client.ovpn
+cp client.ovpn /home/vps/public_html/
 
 # install stunnel
 apt-get install stunnel4 -y
