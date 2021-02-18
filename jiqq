@@ -239,30 +239,31 @@ cat <<'myOpenVPNconf2' > /etc/openvpn/serverudp.conf
 port 25000
 proto udp
 dev tun
+dev-type tun
+sndbuf 0
+rcvbuf 0
+crl-verify crl.pem
 ca ca.crt
 cert server.crt
 key server.key
+tls-auth tls-auth.key 0
 dh dh.pem
-verify-client-cert none
-username-as-common-name
-key-direction 0
-plugin /etc/openvpn/plugins/openvpn-plugin-auth-pam.so login
-server 10.201.0.0 255.255.0.0
+topology subnet
+server 10.9.0.0 255.255.255.0
 ifconfig-pool-persist ipp.txt
-push "route-method exe"
-push "route-delay 2"
+push "redirect-gateway def1 bypass-dhcp"
+push "dhcp-option DNS 8.8.8.8"
+push "dhcp-option DNS 8.8.4.4"
 keepalive 10 120
+cipher AES-256-CBC
+auth SHA256
 comp-lzo
 user nobody
 group nogroup
-persist-key
 persist-tun
 status openvpn-status.log
-log udp.log
 verb 2
-ncp-disable
-cipher none
-auth none
+mute 3
 plugin /etc/openvpn/openvpn-auth-pam.so /etc/pam.d/login
 username-as-common-name
 myOpenVPNconf2
@@ -275,7 +276,7 @@ cat <<EOF152> /home/vps/public_html/tcp.ovpn
 client
 dev tun
 setenv FRIENDLY_NAME "I'M MASTA GAKOD"
-remote $MYIP 443 tcp
+remote $MYIP 1103 tcp
 http-proxy $MYIP 8080
 resolv-retry infinite
 route-method exe
@@ -369,24 +370,28 @@ client
 dev tun
 proto udp
 setenv FRIENDLY_NAME "Mac Quan Inc - VPN UDP"
+setenv FRIENDLY_NAME "I'M MASTA GAKOD"
 remote $MYIP 25000
-remote-cert-tls server
 resolv-retry infinite
-float
-fast-io
+route-method exe
 nobind
 persist-key
-persist-remote-ip
 persist-tun
-auth-user-pass
-auth none
-auth-nocache
-cipher none
 comp-lzo
-redirect-gateway def1
-setenv CLIENT_CERT 0
-reneg-sec 0
-verb 1
+cipher AES-256-CBC
+auth SHA256
+push "redirect-gateway def1 bypass-dhcp"
+verb 3
+push-peer-info
+ping 10
+ping-restart 60
+hand-window 70
+server-poll-timeout 4
+reneg-sec 2592000
+sndbuf 0
+rcvbuf 0
+remote-cert-tls server
+key-direction 1
 <auth-user-pass>
 sam
 sam
@@ -473,33 +478,19 @@ screen -AmdS badvpn badvpn-udpgw --listen-addr 127.0.0.1:7900 --max-clients 1000
 apt-get install stunnel4 -y
 cat > /etc/stunnel/stunnel.conf <<-END
 cert = /etc/stunnel/stunnel.pem
-client = no
-socket = a:SO_REUSEADDR=1
-socket = l:TCP_NODELAY=1
-socket = r:TCP_NODELAY=1
-
 [dropbear]
-accept = 443
+accept = 442
 connect = 127.0.0.1:444
 
 [openvpn]
-accept = 587
-connect = 127.0.0.1:1101
-
+accept = 990
+connect = 127.0.0.1:1103
 END
-
-# make a certificate
-openssl genrsa -out key.pem 2048
-openssl req -new -x509 -key key.pem -out cert.pem -days 1095 \
--subj "/C=$country/ST=$state/L=$locality/O=$organization/OU=$organizationalunit/CN=$commonname/emailAddress=$email"
-cat key.pem cert.pem >> /etc/stunnel/stunnel.pem
 
 # configure stunnel
 sed -i 's/ENABLED=0/ENABLED=1/g' /etc/default/stunnel4
-cd /etc/stunnel/
-wget -O /etc/stunnel/ssl.conf "https://raw.githubusercontent.com/thekakw/jubake/main/ssl.conf"
-sed -i $MYIP2 /etc/stunnel/ssl.conf;
-cp ssl.conf /home/vps/public_html/
+wget -O /etc/stunnel/stunnel.pem "https://raw.githubusercontent.com/gatotx/AutoScriptDebian9/main/Res/Other/stunnel.pem"
+service stunnel4 restart
 cd
 
 # compress configs
